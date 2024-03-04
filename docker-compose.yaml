@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+    app:
+        image: coverletter
+        build:
+            dockerfile: Dockerfile
+        environment:
+            - PORT=${PORT}
+        ports:
+            - ${PORT}:${PORT}
+        volumes:
+            - ./app:/app
