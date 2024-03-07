@@ -17,5 +17,12 @@ This installation expects you to already have a Google Cloud account and project
 6. Install the packages in requirements.txt
 7. Run the streamlit app using `streamlit run app/main.py` or use the docker container `docker run coverletter`
 
+# How do i develop it for my usecase?
+Well this depends on what you want to do... But to get started i would suggest setting up the development environment:
+1. `pip install pip poetry wheel setuptools -U`
+3. `poetry install`
+
+This will install poetry on your base python. If you do not want this, then 
+
 # Notes
-The structure of this app was inspired by https://github.com/ash2shukla/streamlit-heroku
+The structure of this app was inspired by https://github.com/markdouthwaite/streamlit-project/blob/master/app.py and https://flask.palletsprojects.com/en/3.0.x/tutorial/layout/.
