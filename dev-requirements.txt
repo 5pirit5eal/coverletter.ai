@@ -1,0 +1,5 @@
+black
+bandit
+mypy
+pylint
+pip-tools

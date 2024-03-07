@@ -1,7 +1,5 @@
 #!/bin/bash
-
-# Install pipenv if not already installed
-pip install pipenv
-
-# Install requirements using pipenv
-pipenv shell
+python -m venv .venv --prompt coverletter
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -r dev-requirements.txt
