@@ -162,3 +162,9 @@ cython_debug/
 # Personal stuff
 private/
 personal/
+
+# database files
+*.db
+
+# devcontainer files
+.devcontainer/
