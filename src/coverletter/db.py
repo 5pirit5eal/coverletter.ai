@@ -1,6 +1,9 @@
-from sqlalchemy import ForeignKey, create_engine, select, insert
+from sqlalchemy import Engine, ForeignKey, create_engine, select, insert
 from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, mapped_column, Session
 from datetime import datetime as DateTime
+import click
+from flask_sqlalchemy import SQLAlchemy
+from flask import current_app, g
 
 
 class Base(DeclarativeBase):
@@ -102,72 +105,19 @@ class Config(Base):
     cover_letters: Mapped[list["CoverLetter"]] = relationship(back_populates="config")
 
 
-def init_dummy_database(engine):
-    Base.metadata.create_all(engine)
+def get_db():
+    if "db" not in g:
+        db = SQLAlchemy(model_class=Base)
+        # initialize the app with the extension
+        db.init_app(current_app)
+        g.db = db
 
-    # create dummy user Max Mustermann
-    with Session(engine) as session:
-        user_id = session.execute(
-            insert(User).values(
-                name="Max Mustermann", email="max.mustermann@gmail.com", password="1234"
-            )
-        ).last_inserted_params()["user_id"]
-        
-        session.commit()
-
-        # load dummy resume from private/cv.md and split by categories
-        with open("private/cv.md", "r") as file:
-            cv = file.read()
-
-        resume = {
-            "education": "BSc in Computer Science, University of Munich, 2015-2018, 3.5",
-            "work": "Software Developer, Google, 2018-2021",
-            "project": "Developed a chatbot for customer service",
-            "skill": "Python, Java, C++, SQL",
-            "language": "German, English",
-            "certification": "AWS Certified Developer",
-            "volunteer": "Tutor at the University of Munich",
-            "award": "Best Software Developer 2020",
-            "publication": "Chatbot for customer service, 2020",
-            "course": "Machine Learning, Coursera, 2021",
-        }
-
-        resume_id = session.execute(
-            insert(Resume).values(user_id=user_id, language="eng")
-        ).last_inserted_params()["resume_id"]
-        session.commit()
-
-        # load default job posting
-        result = session.execute(
-            select(JobPosting).where(JobPosting.url == "default")
-        ).scalar_one_or_none()
-        if result is None:
-            with open("private/job_description.txt", "r") as file:
-                text = file.read()
-            session.execute(
-                insert(JobPosting).values(url="default", text=text, date=DateTime.today())
-            )
-
-    # load default cv
-    with open("private/cv.md", "r") as file:
-        cv = file.read()
-    with Session(engine) as session:
-        result = session.execute(select(User).where(User.name == "default")).scalar_one_or_none()
-        if result is None:
-            session.execute(
-                insert(User).values(name="default", email="default", password="default")
-            )
-            session.execute(insert(Resume).values(user_id=1, language="eng"))
-            session.execute(
-                insert(ResumeItem).values(
-                    resume_id=1, title="default", description=cv, category="cv"
-                )
-            )
-            session.execute(insert(Prompt).values(resume_id=1, posting_id=1, prompt="default"))
+    return g.db
 
 
 if __name__ == "__main__":
-    from sqlalchemy import create_engine
+    from coverletter import create_app
 
-    engine = create_engine("sqlite+pysqlite:///app.db", echo=True, future=True)
-    Base.metadata.create_all(engine)
+    app = create_app()
+    db = get_db()
+    db.create_all()

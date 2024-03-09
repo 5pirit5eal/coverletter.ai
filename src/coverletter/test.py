@@ -2,7 +2,7 @@ from vertexai.language_models import TextGenerationModel
 from bs4 import BeautifulSoup
 import requests
 import argparse
-from src.data_models import Resume, ResumeItem, Prompt, JobPosting, CoverLetter, Config, Base
+from coverletter.db import Resume, ResumeItem, Prompt, JobPosting, CoverLetter, Config, Base
 from sqlalchemy import create_engine, insert
 
 engine = create_engine("sqlite+pysqlite:///app.db", echo=True, future=True)

@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "coverletter"
+dynamic = ["version"]
+description = 'A web-application that allows user to create a profile and use their data and job postings to create AI-generated coverletters'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "GNU GENERAL PUBLIC LICENSE V3"
+keywords = []
+authors = [{ name = "5pirit5eal", email = "rubeneschulze@googlemail.com" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  # "beautifulsoup4",
+  # "requests",
+  # "google-cloud-aiplatform",
+  "flask",
+  "SQLAlchemy",
+  "Flask-SQLAlchemy",
+]
+
+[project.urls]
+Documentation = "https://github.com/5pirit5eal/coverletter.ai#readme"
+Issues = "https://github.com/5pirit5eal/coverletter.ai/issues"
+Source = "https://github.com/5pirit5eal/coverletter.ai"
+
+[tool.hatch.version]
+path = "src/coverletter/__about__.py"
+
+[tool.hatch.envs.dev]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+  "black",
+  "bandit",
+  "mypy",
+  "pylint",
+]
+[tool.hatch.envs.dev.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = ["- coverage combine", "coverage report"]
+cov = ["test-cov", "cov-report"]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = ["mypy>=1.0.0"]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/coverletter tests}"
+
+[tool.coverage.run]
+source_pkgs = ["coverletter", "tests"]
+branch = true
+parallel = true
+omit = ["src/coverletter/__about__.py"]
+
+[tool.coverage.paths]
+coverletter = ["src/coverletter", "*/coverletter.ai/src/coverletter"]
+tests = ["tests", "*/coverletter.ai/tests"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
