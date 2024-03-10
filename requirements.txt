@@ -1,6 +1,0 @@
-# beautifulsoup4
-# requests
-# google-cloud-aiplatform
-flask
-SQLAlchemy
-Flask-SQLAlchemy

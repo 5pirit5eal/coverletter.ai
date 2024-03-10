@@ -166,5 +166,6 @@ personal/
 # database files
 *.db
 
-# devcontainer files
+# vscode files
 .devcontainer/
+.vscode

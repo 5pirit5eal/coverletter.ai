@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = 'A web-application that allows user to create a profile and use their data and job postings to create AI-generated coverletters'
 readme = "README.md"
 requires-python = ">=3.8"
-license = "GNU GENERAL PUBLIC LICENSE V3"
+license = { text = "GNU GENERAL PUBLIC LICENSE V3" }
 keywords = []
 authors = [{ name = "5pirit5eal", email = "rubeneschulze@googlemail.com" }]
 classifiers = [
@@ -29,6 +29,8 @@ dependencies = [
   "flask",
   "SQLAlchemy",
   "Flask-SQLAlchemy",
+  "python-dotenv",
+  "flask-wtf"
 ]
 
 [project.urls]
@@ -48,6 +50,8 @@ dependencies = [
   "mypy",
   "pylint",
 ]
+path = ".hatch"
+
 [tool.hatch.envs.dev.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"

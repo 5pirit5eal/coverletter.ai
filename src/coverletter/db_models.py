@@ -1,25 +1,20 @@
-from sqlalchemy import Engine, ForeignKey, create_engine, select, insert
-from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, mapped_column, Session
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, relationship, mapped_column
 from datetime import datetime as DateTime
-import click
-from flask_sqlalchemy import SQLAlchemy
-from flask import current_app, g
+
+from coverletter import db
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-class User(Base):
+class User(db.Model):
     __tablename__ = "users"
     user_id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column()
-    email: Mapped[str] = mapped_column()
+    name: Mapped[str] = mapped_column(String(64))
+    email: Mapped[str] = mapped_column(String(64), unique=True)
     password: Mapped[str] = mapped_column()
     resumes: Mapped[list["Resume"]] = relationship(back_populates="user")
 
 
-class Resume(Base):
+class Resume(db.Model):
     __tablename__ = "resumes"
     resume_id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
@@ -29,7 +24,7 @@ class Resume(Base):
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="resume")
 
 
-class ResumeItem(Base):
+class ResumeItem(db.Model):
     __tablename__ = "resume_items"
     resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.resume_id"), primary_key=True)
     title: Mapped[str] = mapped_column(primary_key=True)
@@ -43,7 +38,7 @@ class ResumeItem(Base):
     resume: Mapped[Resume] = relationship(back_populates="resume_items")
 
 
-class Prompt(Base):
+class Prompt(db.Model):
     __tablename__ = "prompts"
     prompt_id: Mapped[int] = mapped_column(primary_key=True)
     resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.resume_id"))
@@ -54,7 +49,7 @@ class Prompt(Base):
     cover_letters: Mapped[list["CoverLetter"]] = relationship(back_populates="prompt")
 
 
-class JobPosting(Base):
+class JobPosting(db.Model):
     __tablename__ = "postings"
     posting_id: Mapped[int] = mapped_column(primary_key=True)
     url: Mapped[str] = mapped_column()
@@ -64,7 +59,7 @@ class JobPosting(Base):
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="posting")
 
 
-class CoverLetter(Base):
+class CoverLetter(db.Model):
     __tablename__ = "cover_letters"
     cover_letter_id: Mapped[int] = mapped_column(primary_key=True)
     prompt_id: Mapped[int] = mapped_column(ForeignKey("prompts.prompt_id"))
@@ -74,7 +69,7 @@ class CoverLetter(Base):
     config: Mapped["Config"] = relationship(back_populates="cover_letters")
 
 
-class Config(Base):
+class Config(db.Model):
     """Configuration of the TextGenerationModel by Google Cloud."""
 
     __tablename__ = "model_configs"
@@ -103,21 +98,3 @@ class Config(Base):
     frequency_penalty: Mapped[float | None] = mapped_column()
 
     cover_letters: Mapped[list["CoverLetter"]] = relationship(back_populates="config")
-
-
-def get_db():
-    if "db" not in g:
-        db = SQLAlchemy(model_class=Base)
-        # initialize the app with the extension
-        db.init_app(current_app)
-        g.db = db
-
-    return g.db
-
-
-if __name__ == "__main__":
-    from coverletter import create_app
-
-    app = create_app()
-    db = get_db()
-    db.create_all()
