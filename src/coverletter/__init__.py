@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 
 load_dotenv()
@@ -46,7 +47,9 @@ except OSError:
 
 db = SQLAlchemy(app=app)
 
-from coverletter import routes
+migrate = Migrate(app, db)
+
+from coverletter import routes, db_models, auth
 
 # from coverletter import auth
 

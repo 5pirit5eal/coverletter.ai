@@ -30,7 +30,8 @@ dependencies = [
   "SQLAlchemy",
   "Flask-SQLAlchemy",
   "python-dotenv",
-  "flask-wtf"
+  "flask-wtf",
+  "flask_migrate",
 ]
 
 [project.urls]

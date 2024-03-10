@@ -9,33 +9,42 @@ class User(db.Model):
     __tablename__ = "users"
     user_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64))
-    email: Mapped[str] = mapped_column(String(64), unique=True)
-    password: Mapped[str] = mapped_column()
+    email: Mapped[str] = mapped_column(String(64), index=True, unique=True)
+    password_hash: Mapped[str | None] = mapped_column(String(256))
     resumes: Mapped[list["Resume"]] = relationship(back_populates="user")
+
+    def __repr__(self):
+        return f"<User {self.name}>"
 
 
 class Resume(db.Model):
     __tablename__ = "resumes"
     resume_id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
-    language: Mapped[str] = mapped_column()
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), index=True)
+    language: Mapped[str] = mapped_column(String(3))
     user: Mapped[User] = relationship(back_populates="resumes")
     resume_items: Mapped[list["ResumeItem"]] = relationship(back_populates="resume")
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="resume")
+
+    def __repr__(self):
+        return f"<Resume {self.resume_id}>"
 
 
 class ResumeItem(db.Model):
     __tablename__ = "resume_items"
     resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.resume_id"), primary_key=True)
-    title: Mapped[str] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(128), primary_key=True)
     description: Mapped[str] = mapped_column()
     # education, work, project, skill, language, certification, volunteer, award, publication, course
-    category: Mapped[str] = mapped_column()
+    category: Mapped[str] = mapped_column(String(32), index=True)
     begin_date: Mapped[DateTime | None] = mapped_column()
     end_date: Mapped[DateTime | None] = mapped_column()
     grade: Mapped[float | None] = mapped_column()
     location: Mapped[str | None] = mapped_column()
     resume: Mapped[Resume] = relationship(back_populates="resume_items")
+
+    def __repr__(self):
+        return f"<ResumeItem {self.title}: {self.description[:50]}...>"
 
 
 class Prompt(db.Model):
@@ -48,15 +57,21 @@ class Prompt(db.Model):
     posting: Mapped["JobPosting"] = relationship(back_populates="prompts")
     cover_letters: Mapped[list["CoverLetter"]] = relationship(back_populates="prompt")
 
+    def __repr__(self):
+        return f"<Prompt {self.prompt_id} {self.prompt[:25]}>"
+
 
 class JobPosting(db.Model):
     __tablename__ = "postings"
     posting_id: Mapped[int] = mapped_column(primary_key=True)
-    url: Mapped[str] = mapped_column()
+    url: Mapped[str | None] = mapped_column()
     text: Mapped[str] = mapped_column(default="")
-    date: Mapped[DateTime] = mapped_column(default=DateTime.today())
-    language: Mapped[str] = mapped_column(default="eng")
+    date: Mapped[DateTime] = mapped_column(default=lambda: DateTime.today())
+    language: Mapped[str] = mapped_column(String(3), default="eng")
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="posting")
+
+    def __repr__(self):
+        return f"<JobPosting {self.url}>"
 
 
 class CoverLetter(db.Model):
@@ -65,11 +80,15 @@ class CoverLetter(db.Model):
     prompt_id: Mapped[int] = mapped_column(ForeignKey("prompts.prompt_id"))
     config_id: Mapped[int] = mapped_column(ForeignKey("model_configs.config_id"))
     response: Mapped[str] = mapped_column()
+    timestamp: Mapped[DateTime] = mapped_column(default=lambda: DateTime.now(), index=True)
     prompt: Mapped[Prompt] = relationship(back_populates="cover_letters")
-    config: Mapped["Config"] = relationship(back_populates="cover_letters")
+    config: Mapped["ModelConfig"] = relationship(back_populates="cover_letters")
+
+    def __repr__(self):
+        return f"<CoverLetter {self.cover_letter_id}>"
 
 
-class Config(db.Model):
+class ModelConfig(db.Model):
     """Configuration of the TextGenerationModel by Google Cloud."""
 
     __tablename__ = "model_configs"
@@ -98,3 +117,10 @@ class Config(db.Model):
     frequency_penalty: Mapped[float | None] = mapped_column()
 
     cover_letters: Mapped[list["CoverLetter"]] = relationship(back_populates="config")
+
+    def __repr__(self):
+        return f"<ModelConfig {self.name} {self.model_id} {self.config_id}>"
+
+
+if __name__ == "__main__":
+    print(User(name="test", email="", password_hash=""))
