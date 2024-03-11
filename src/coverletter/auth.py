@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
+from coverletter.db_models import User
 
 
 class LoginForm(FlaskForm):
@@ -11,10 +12,17 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-    user = StringField("Name", validators=[DataRequired()])
+    name = StringField("Name", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired()])
+    password2 = PasswordField("Repeat Password", validators=[DataRequired(), EqualTo("password")])
+    email = StringField("Email", validators=[DataRequired(), Email()])
     submit = SubmitField("Register")
+
+    def validate_email(self, email):
+        """Automatically validate if email address is not already registered."""
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None:
+            raise ValidationError("Please use a different email address.")
 
 
 # import functools

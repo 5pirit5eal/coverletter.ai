@@ -26,12 +26,15 @@ dependencies = [
   # "beautifulsoup4",
   # "requests",
   # "google-cloud-aiplatform",
+  "beartype",
   "flask",
   "SQLAlchemy",
   "Flask-SQLAlchemy",
   "python-dotenv",
   "flask-wtf",
   "flask_migrate",
+  "flask_login",
+  "email-validator",
 ]
 
 [project.urls]

@@ -1,13 +1,19 @@
-from sqlalchemy import ForeignKey, String
-from sqlalchemy.orm import Mapped, relationship, mapped_column
 from datetime import datetime as DateTime
 
-from coverletter import db
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login import UserMixin
+from beartype import beartype
+from beartype.vale import Is
+from typing import Annotated
+
+from coverletter import db, login
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "users"
-    user_id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64))
     email: Mapped[str] = mapped_column(String(64), index=True, unique=True)
     password_hash: Mapped[str | None] = mapped_column(String(256))
@@ -16,23 +22,29 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.name}>"
 
+    def set_password(self, password: str) -> None:
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return check_password_hash(self.password_hash, password)
+
 
 class Resume(db.Model):
     __tablename__ = "resumes"
-    resume_id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), index=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     language: Mapped[str] = mapped_column(String(3))
     user: Mapped[User] = relationship(back_populates="resumes")
     resume_items: Mapped[list["ResumeItem"]] = relationship(back_populates="resume")
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="resume")
 
     def __repr__(self):
-        return f"<Resume {self.resume_id}>"
+        return f"<Resume {self.id}>"
 
 
 class ResumeItem(db.Model):
     __tablename__ = "resume_items"
-    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.resume_id"), primary_key=True)
+    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id"), primary_key=True)
     title: Mapped[str] = mapped_column(String(128), primary_key=True)
     description: Mapped[str] = mapped_column()
     # education, work, project, skill, language, certification, volunteer, award, publication, course
@@ -49,21 +61,21 @@ class ResumeItem(db.Model):
 
 class Prompt(db.Model):
     __tablename__ = "prompts"
-    prompt_id: Mapped[int] = mapped_column(primary_key=True)
-    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.resume_id"))
-    posting_id: Mapped[int] = mapped_column(ForeignKey("postings.posting_id"))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id"))
+    posting_id: Mapped[int] = mapped_column(ForeignKey("postings.id"))
     prompt: Mapped[str] = mapped_column()
     resume: Mapped[Resume] = relationship(back_populates="prompts")
     posting: Mapped["JobPosting"] = relationship(back_populates="prompts")
     cover_letters: Mapped[list["CoverLetter"]] = relationship(back_populates="prompt")
 
     def __repr__(self):
-        return f"<Prompt {self.prompt_id} {self.prompt[:25]}>"
+        return f"<Prompt {self.id} {self.prompt[:25]}>"
 
 
 class JobPosting(db.Model):
     __tablename__ = "postings"
-    posting_id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     url: Mapped[str | None] = mapped_column()
     text: Mapped[str] = mapped_column(default="")
     date: Mapped[DateTime] = mapped_column(default=lambda: DateTime.today())
@@ -76,23 +88,23 @@ class JobPosting(db.Model):
 
 class CoverLetter(db.Model):
     __tablename__ = "cover_letters"
-    cover_letter_id: Mapped[int] = mapped_column(primary_key=True)
-    prompt_id: Mapped[int] = mapped_column(ForeignKey("prompts.prompt_id"))
-    config_id: Mapped[int] = mapped_column(ForeignKey("model_configs.config_id"))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    prompt_id: Mapped[int] = mapped_column(ForeignKey("prompts.id"))
+    config_id: Mapped[int] = mapped_column(ForeignKey("model_configs.id"))
     response: Mapped[str] = mapped_column()
     timestamp: Mapped[DateTime] = mapped_column(default=lambda: DateTime.now(), index=True)
     prompt: Mapped[Prompt] = relationship(back_populates="cover_letters")
     config: Mapped["ModelConfig"] = relationship(back_populates="cover_letters")
 
     def __repr__(self):
-        return f"<CoverLetter {self.cover_letter_id}>"
+        return f"<CoverLetter {self.id}>"
 
 
 class ModelConfig(db.Model):
     """Configuration of the TextGenerationModel by Google Cloud."""
 
     __tablename__ = "model_configs"
-    config_id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     # common name or family fo the model
     name: Mapped[str] = mapped_column()
     # identifier of the google model e.g. "text-bison@002"
@@ -120,6 +132,15 @@ class ModelConfig(db.Model):
 
     def __repr__(self):
         return f"<ModelConfig {self.name} {self.model_id} {self.config_id}>"
+
+
+IntString = Annotated[str, Is[lambda s: s.isdigit()]]
+
+
+@beartype
+@login.user_loader
+def load_user(user_id: IntString) -> User:
+    return User.query.get(int(user_id))
 
 
 if __name__ == "__main__":

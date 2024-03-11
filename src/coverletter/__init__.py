@@ -4,33 +4,14 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager
 
 
 load_dotenv()
 
-
-def init_db(app: Flask) -> None:
-    """Initialise the database with the app context."""
-    with app.app_context():
-        db.init_app(app)
-        db.create_all()
-
-
-# @click.command("init-db")
-# def init_db_command():
-#     from flask import current_app
-
-#     init_db(current_app)
-#     click.echo("Initialized database.")
-
-
-# def _init_app(app: Flask):
-#     app.cli.add_command(init_db_command)
-
-
-# create and configure the app
 app = Flask(__name__, instance_relative_config=True)
 
+# create and configure the app
 from coverletter.config import Config
 
 app.config.from_object(Config)
@@ -44,6 +25,8 @@ try:
 except OSError:
     pass
 
+login = LoginManager(app)
+login.login_view = "login"
 
 db = SQLAlchemy(app=app)
 
@@ -54,3 +37,16 @@ from coverletter import routes, db_models, auth
 # from coverletter import auth
 
 # app.register_blueprint(auth.bp)
+
+
+@app.shell_context_processor
+def make_shell_context() -> dict:
+    import sqlalchemy as sa
+    import sqlalchemy.orm as so
+
+    return {"sa": sa, "so": so, "db": db, "User": db_models.User, "Resume": db_models.Resume}
+
+
+@app.cli.command("init-db")
+def init_db_command():
+    db.create_all()

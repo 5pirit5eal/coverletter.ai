@@ -15,11 +15,11 @@ This installation expects you to already have a Google Cloud account and project
 4. Enable VertexAI API on your project
 5. Use `gcloud config set project PROJECT_ID`
 6. Install the packages using hatch `hatch shell`
-7. Run the streamlit app using `streamlit run src/main.py` or use the docker container `docker run coverletter`
+7. Run the flask app using `flask run` or use the docker container `docker run coverletter`
 
 # How do i develop it for my usecase?
 Install the development environment using hatch: `hatch -e dev shell`
 Afterwards you can think about other things. 
 
 # Notes
-The structure of this app was inspired by https://flask.palletsprojects.com/en/3.0.x/tutorial/layout/.
+The structure of this app was inspired by https://flask.palletsprojects.com/en/3.0.x/tutorial/layout/ and https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world.
