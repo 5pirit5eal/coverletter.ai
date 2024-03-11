@@ -32,7 +32,8 @@ db = SQLAlchemy(app=app)
 
 migrate = Migrate(app, db)
 
-from coverletter import routes, db_models, auth
+from coverletter import db_models
+from coverletter.views import routes, auth
 
 # from coverletter import auth
 
