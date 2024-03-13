@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Add resume item</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title(size=64) }}<br>
+            {% for error in form.title.errors %}
+            <span style="color: red">[{{error}}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.description.label }}<br>
+            {{ form.description(size=64) }}<br>
+            {% for error in form.description.errors%}
+            <span style="color: red">{{error}}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.category.label }}<br>
+            {{ form.category(size=1) }}<br>
+            {% for error in form.category.errors%}
+            <span style="color: red">{{error}}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.begin_date.label }}<br>
+            {{ form.begin_date(size=32) }}<br>
+            {% for error in form.begin_date.errors%}
+            <span style="color: red">{{error}}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.end_date.label }}<br>
+            {{ form.end_date(size=32) }}<br>
+            {% for error in form.end_date.errors%}
+            <span style="color: red">{{error}}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.grade.label }}<br>
+            {{ form.grade(size=32) }}<br>
+            {% for error in form.grade.errors%}
+            <span style="color: red">{{error}}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.location.label }}<br>
+            {{ form.location(size=32) }}<br>
+            {% for error in form.location.errors%}
+            <span style="color: red">{{error}}</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

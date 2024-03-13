@@ -34,6 +34,7 @@ class Resume(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     language: Mapped[str] = mapped_column(String(3))
+    created: Mapped[DateTime] = mapped_column(default=lambda: DateTime.now())
     user: Mapped[User] = relationship(back_populates="resumes")
     resume_items: Mapped[list["ResumeItem"]] = relationship(back_populates="resume")
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="resume")

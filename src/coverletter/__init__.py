@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 
 
 load_dotenv()
@@ -33,7 +33,7 @@ db = SQLAlchemy(app=app)
 migrate = Migrate(app, db)
 
 from coverletter import db_models
-from coverletter.views import routes, auth
+from coverletter.views import *
 
 # from coverletter import auth
 
@@ -51,3 +51,7 @@ def make_shell_context() -> dict:
 @app.cli.command("init-db")
 def init_db_command():
     db.create_all()
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

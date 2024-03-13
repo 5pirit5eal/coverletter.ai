@@ -21,5 +21,12 @@ This installation expects you to already have a Google Cloud account and project
 Install the development environment using hatch: `hatch -e dev shell`
 Afterwards you can think about other things. 
 
+# How do i migrate the database from one version of the schema to the next?
+This app relies on the database migration tool `flask_migrate`. It uses `alembic` to generate migration scripts. 
+ - To init your database use `flask db init`.
+ - To create a migration commit use `flask db migrate -m your_message`
+ - To upgrade your database to a commit use `flask db upgrade`. This will use the newest commit state by default.
+ - To downgrade your database use `flask db downgrade`. This will undo the last migration step.
+
 # Notes
 The structure of this app was inspired by https://flask.palletsprojects.com/en/3.0.x/tutorial/layout/ and https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world.

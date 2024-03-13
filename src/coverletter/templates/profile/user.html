@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, {{ user.name }}!</h1>
+    <p>Here is some information about you:</p>
+    <h2>Email: {{ user.email }}</h2>
+    {% if user.resumes %}
+    <h2>The following resumes: </h2>
+    {% for resume in user.resumes %}
+        <h3>Resume {{ resume.id }} created on {{ resume.created }} in Language {{ resume.language }}:</h3>
+        {% for resume_item in resume.resume_items[::-1] %}
+        <p>{{ resume_item.title }} - {{ resume_item.begin_date }} to {{ resume_item.end_date }}</p>
+        <p>{{ resume_item.description }}</p>
+        {% endfor %}
+        <p>To add another resume item click 
+            <a href="{{ url_for('add_resume_item', resume_id=resume.id) }}">here</a>
+        </p>
+    {% endfor %}
+    {% else %}
+    <h2>No resume yet!</h2>
+    <p>Click <a href="{{ url_for('add_resume', email=user.email) }}">here</a> to create a resume item.</p>
+    {% endif %}
+{% endblock %}
