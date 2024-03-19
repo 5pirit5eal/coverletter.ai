@@ -32,10 +32,13 @@
             </td>
         </tr>
     </table>
+    {% if user == current_user %}
+    <p><a href="{{ url_for('edit_profile') }}">Edit your profile</a></p>
+    {% endif %}
     {% if resume_preview %}
     <h2>The following resumes: </h2>
     {% for resume, resume_categories in resume_preview.items() %}
-        <h3>Resume {{ resume.id }} created on {{ resume.created }} in Language {{ resume.language }}:</h3>
+        <h3>Resume {{ resume.id }} created on {{ resume.created }} in Language {{ resume.language.upper() }}:</h3>
         {% include 'profile/resume_category.html' %}
         <p>To add another resume item click 
             <a href="{{ url_for('add_resume_item', resume_id=resume.id) }}">here</a>
