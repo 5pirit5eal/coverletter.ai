@@ -70,38 +70,6 @@ class EditProfileForm(FlaskForm):
     submit = SubmitField("Submit")
 
 
-def get_resume_categories(resume: Resume) -> dict[str, list[ResumeItem]]:
-    """Helper function that provides a mapping of resume categories to
-    items contained in said category sorted by begin date.
-    """
-    categories = {item.category for item in resume.resume_items}
-    resume_categories = {}
-
-    for category in categories:
-        resume_items = sorted(
-            [item for item in resume.resume_items if item.category == category],
-            key=lambda x: x.begin_date,
-            reverse=True,
-        )
-        resume_items_preview = [
-            {
-                "title": resume_item.title,
-                "description": resume_item.description,
-                "begin_date": (
-                    resume_item.begin_date.strftime("%m/%y") if resume_item.begin_date else None
-                ),
-                "end_date": (
-                    "- " + resume_item.end_date.strftime("%m/%y") if resume_item.end_date else None
-                ),
-                "grade": resume_item.grade,
-                "location": resume_item.location,
-            }
-            for resume_item in resume_items
-        ]
-        resume_categories[category] = resume_items_preview
-    return resume_categories
-
-
 @app.route("/edit_profile", methods=["GET", "POST"])
 @login_required
 def edit_profile():
@@ -124,7 +92,7 @@ def user(email: str):
     user: User = User.query.filter_by(email=email).first_or_404()
     resume_preview = {}
     for resume in user.resumes:
-        resume_categories = get_resume_categories(resume)
+        resume_categories = resume.get_items_per_category()
         resume_preview[resume] = resume_categories
     return render_template("profile/user.html", user=user, resume_preview=resume_preview)
 

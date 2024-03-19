@@ -4,7 +4,7 @@ from coverletter import app, db
 
 @app.route("/test")
 def raise_error():
-    return 404
+    raise 200
 
 
 @app.errorhandler(404)
