@@ -7,6 +7,7 @@ from flask_login import UserMixin
 from beartype import beartype
 from beartype.vale import Is
 from typing import Annotated
+from hashlib import md5
 
 from coverletter import db, login
 
@@ -18,6 +19,8 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(64), index=True, unique=True)
     password_hash: Mapped[str | None] = mapped_column(String(256))
     resumes: Mapped[list["Resume"]] = relationship(back_populates="user")
+    about_me: Mapped[str | None] = mapped_column(String(140))
+    last_seen: Mapped[DateTime | None] = mapped_column(default=lambda: DateTime.now())
 
     def __repr__(self):
         return f"<User {self.name}>"
@@ -27,6 +30,10 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
+
+    def avatar(self, size: int) -> str:
+        digest = md5(self.email.lower().encode("utf-8")).hexdigest()
+        return f"https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}"
 
 
 class Resume(db.Model):

@@ -1,0 +1,19 @@
+{{% for resume_category, resume_itmes in resume_categories.items() %}}
+    <h3> Category: {{ resume_category }}</h3>
+    <table>
+        <tr>
+            <th>Dates</th>
+            <th>Title</th>
+            <th>Description</th>
+            
+        </tr>
+        {% for resume_item in resume_items %}
+            <tr>
+                <td>{{ resume_item.begin_date }} {{ resume_item.end_date }}</td>
+                <td>{{ resume_item.title }}</td>
+                <td>{{ resume_item.description }}</td>
+                
+            </tr>
+        {% endfor %}
+    </table>
+{{% endfor %}}
