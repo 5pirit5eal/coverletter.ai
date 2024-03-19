@@ -1,4 +1,4 @@
-{{% for resume_category, resume_itmes in resume_categories.items() %}}
+{% for resume_category, resume_items in resume_categories.items() %}
     <h3> Category: {{ resume_category }}</h3>
     <table>
         <tr>
@@ -16,4 +16,4 @@
             </tr>
         {% endfor %}
     </table>
-{{% endfor %}}
+{% endfor %}

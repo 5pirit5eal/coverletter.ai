@@ -13,6 +13,7 @@ from coverletter import app, db
 from flask_login import login_required, current_user
 from coverletter.db_models import User, Resume, ResumeItem
 from flask import render_template, redirect, url_for, session
+from datetime import datetime, timezone
 
 
 class ResumeItemForm(FlaskForm):
@@ -153,3 +154,10 @@ def add_resume_item(resume_id: str):
         return redirect(url_for("user", email=current_user.email))
 
     return render_template("profile/add_resume_item.html", form=form)
+
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.now(timezone.utc)
+        db.session.commit()

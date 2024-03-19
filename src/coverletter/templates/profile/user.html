@@ -16,6 +16,18 @@
                         <th>Email:</th>
                         <td>{{ user.email }}</td>
                     </tr>
+                    {% if user.about_me %}
+                    <tr>
+                        <th>About me:</th>
+                        <td>{{ user.about_me }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if user.last_seen %}
+                    <tr>
+                        <th>Last seen:</th>
+                        <td>{{ user.last_seen }}</td>
+                    </tr>
+                    {% endif %}
                 </table>
             </td>
         </tr>
@@ -24,7 +36,7 @@
     <h2>The following resumes: </h2>
     {% for resume, resume_categories in resume_preview.items() %}
         <h3>Resume {{ resume.id }} created on {{ resume.created }} in Language {{ resume.language }}:</h3>
-        {% include '_resume_category.html' %}
+        {% include 'profile/resume_category.html' %}
         <p>To add another resume item click 
             <a href="{{ url_for('add_resume_item', resume_id=resume.id) }}">here</a>
         </p>

@@ -1,4 +1,4 @@
-from datetime import datetime as DateTime
+from datetime import datetime as DateTime, timezone
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,7 +20,7 @@ class User(UserMixin, db.Model):
     password_hash: Mapped[str | None] = mapped_column(String(256))
     resumes: Mapped[list["Resume"]] = relationship(back_populates="user")
     about_me: Mapped[str | None] = mapped_column(String(140))
-    last_seen: Mapped[DateTime | None] = mapped_column(default=lambda: DateTime.now())
+    last_seen: Mapped[DateTime | None] = mapped_column(default=lambda: DateTime.now(timezone.utc))
 
     def __repr__(self):
         return f"<User {self.name}>"
@@ -41,7 +41,7 @@ class Resume(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     language: Mapped[str] = mapped_column(String(3))
-    created: Mapped[DateTime] = mapped_column(default=lambda: DateTime.now())
+    created: Mapped[DateTime] = mapped_column(default=lambda: DateTime.now(timezone.utc))
     user: Mapped[User] = relationship(back_populates="resumes")
     resume_items: Mapped[list["ResumeItem"]] = relationship(back_populates="resume")
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="resume")
@@ -100,7 +100,9 @@ class CoverLetter(db.Model):
     prompt_id: Mapped[int] = mapped_column(ForeignKey("prompts.id"))
     config_id: Mapped[int] = mapped_column(ForeignKey("model_configs.id"))
     response: Mapped[str] = mapped_column()
-    timestamp: Mapped[DateTime] = mapped_column(default=lambda: DateTime.now(), index=True)
+    timestamp: Mapped[DateTime] = mapped_column(
+        default=lambda: DateTime.now(timezone.utc), index=True
+    )
     prompt: Mapped[Prompt] = relationship(back_populates="cover_letters")
     config: Mapped["ModelConfig"] = relationship(back_populates="cover_letters")
 
