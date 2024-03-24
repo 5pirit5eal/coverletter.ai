@@ -97,16 +97,15 @@ def user(email: str):
     return render_template("profile/user.html", user=user, resume_preview=resume_preview)
 
 
-@app.route("/add_resume/<email>", methods=["GET", "POST"])
+@app.route("/add_resume", methods=["GET", "POST"])
 @login_required
-def add_resume(email: str):
-    user = User.query.filter_by(email=email).first_or_404()
-    if not user.resumes:
-        resume = Resume(language="en", user_id=user.id)
+def add_resume():
+    if not current_user.resumes:
+        resume = Resume(language="en", user=current_user)
         db.session.add(resume)
         db.session.commit()
     else:
-        resume = Resume.query.filter_by(user_id=user.id, language="en").first()
+        resume = Resume.query.filter_by(user_id=current_user.id, language="en").first()
     return redirect(url_for("add_resume_item", resume_id=resume.id))
 
     form = ResumeForm()

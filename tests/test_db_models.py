@@ -2,10 +2,16 @@ from unittest import TestCase
 import os
 
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["FLASK_SQLALCHEMY_DATABASE_URI"] = "sqlite+pysqlite:///:memory:"
 
 from datetime import datetime, timezone, timedelta
 from coverletter import app, db
 from coverletter.db_models import User, Resume, Prompt, CoverLetter, JobPosting, ModelConfig
+
+# configure the app for testing
+app.config["TESTING"] = True
+app.config["WTF_CSRF_ENABLED"] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite+pysqlite:///:memory:"
 
 
 class UserModelCase(TestCase):
