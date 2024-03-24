@@ -68,7 +68,7 @@ class Resume(db.Model):
     prompts: Mapped[list["Prompt"]] = relationship(back_populates="resume")
 
     def __repr__(self):
-        return f"<Resume {self.id}>"
+        return f"<Resume {self.id}, Amount of items: {len(self.resume_items)}>"
 
     def get_items_per_category(self) -> dict[str, list["ResumeItem"]]:
         """Helper function that provides a mapping of resume categories to

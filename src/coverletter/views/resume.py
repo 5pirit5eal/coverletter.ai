@@ -53,7 +53,7 @@ class ResumeItemForm(FlaskForm):
             raise ValidationError("End date must be after begin date.")
 
 
-class ResumeForm(FlaskForm):
+class CreateResumeForm(FlaskForm):
     language = SelectField(
         "Language",
         choices=["-", "en", "de", "other"],
@@ -75,9 +75,9 @@ def add_resume():
     #     db.session.commit()
     # return redirect(url_for("add_resume_item", resume_id=resume.id))
 
-    form = ResumeForm()
+    form = CreateResumeForm()
     if form.validate_on_submit():
-        resume = Resume(language=form.language.data, user_id=user.id)
+        resume = Resume(language=form.language.data, user=current_user)
         db.session.add(resume)
         db.session.commit()
         session["resume_id"] = resume.id

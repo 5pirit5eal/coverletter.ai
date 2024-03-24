@@ -38,7 +38,7 @@
     {% if resume_preview %}
     <h2>The following resumes: </h2>
     {% for resume, resume_categories in resume_preview.items() %}
-        <h3>Resume {{ resume.id }} created on {{ resume.created }} in Language {{ resume.language.upper() }}:</h3>
+        <h3>Resume created on {{ resume.created }} in Language {{ resume.language.upper() }}:</h3>
         {% include 'profile/resume_category.html' %}
         <p>To add another resume item click 
             <a href="{{ url_for('add_resume_item', resume_id=resume.id) }}">here</a>
@@ -46,6 +46,6 @@
     {% endfor %}
     {% else %}
     <h2>No resume yet!</h2>
-    <p>Click <a href="{{ url_for('add_resume') }}">here</a> to create a resume item.</p>
     {% endif %}
+    <p>Click <a href="{{ url_for('add_resume') }}">here</a> to create a resume.</p>
 {% endblock %}
