@@ -50,13 +50,35 @@ def create():
     form = CreateCoverLetterForm()
 
     if form.validate_on_submit():
-        posting = JobPosting()
-        pass
+        resume = Resume.query.filter_by(
+            user=current_user, language=form.language.data.lower()
+        ).one()
+        job_posting = JobPosting(
+            company=form.company.data,
+            url=form.posting_url.data,
+            text=form.posting_text.data,
+            date=form.posting_date.data,
+            language=form.language.data.lower(),
+            location=form.location.data,
+        )
+        db.session.add(job_posting)
+
+        prompt = compose_prompt(job_posting, resume, current_user)
+        db.session.add(prompt)
+
+        model_config = ModelConfig(model_id="text-bison@002", name="PaLM", max_output_tokens=1024)
+        db.session.add(model_config)
+
+        coverletter = request_coverletter_with_sdk(prompt, model_config)
+        db.session.add(coverletter)
+        db.session.commit()
+
+        return redirect("coverletters")
 
     return render_template("applications/create_letter.html", form=form)
 
 
-def compose_prompt(job_posting: JobPosting, resume: Resume, user: User) -> str:
+def compose_prompt(job_posting: JobPosting, resume: Resume, user: User) -> Prompt:
     prompt = (
         "Your task is to generate a cover letter for applicant "
         + user.name
@@ -68,7 +90,12 @@ def compose_prompt(job_posting: JobPosting, resume: Resume, user: User) -> str:
 
     prompt += "\n Based on the following CV: \n" + create_resume_table(resume)
     prompt += "\n It is crucial to not hallucinate skills or experiences that are not present in the CV! Try to make the cover letter as relevant as possible. \n"
-    return prompt
+
+    return Prompt(
+        resume=resume,
+        posting=job_posting,
+        prompt=prompt,
+    )
 
 
 def create_resume_table(resume: Resume):
@@ -103,15 +130,35 @@ def create_resume_table(resume: Resume):
     return table
 
 
-def request_coverletter(prompt) -> str:
-    # TODO: Change to requests and REST, not SDK
+def request_coverletter_with_sdk(prompt: Prompt, config: ModelConfig | None = None) -> CoverLetter:
+    if config is None:
+        config = ModelConfig(model_id="text-bison@002", max_output_tokens=1024)
+
     from vertexai.language_models import TextGenerationModel
 
-    model = TextGenerationModel.from_pretrained("text-bison@002")
+    model = TextGenerationModel.from_pretrained(config.model_id)
 
-    translate_client = translate.Client()
-    prompt = translate_client.translate(prompt, target_language="de")
+    response = model.predict(prompt, **config.__dict__)
 
-    response = model.predict(prompt, max_output_tokens=1024)
-    for candidate in response.candidates:
-        print(candidate)
+    coverletter = CoverLetter(
+        prompt=prompt,
+        config=config,
+        response=response.text,
+    )
+    return coverletter
+
+
+# def request_coverletter_with_rest(prompt: str, parameters: dict | None = None) -> str:
+#     if parameters is None:
+#         parameters = {"max_output_tokens": 1024}
+
+#     import requests
+
+#     url = f"https://europe-west3-aiplatform.googleapis.com/v1/projects/{os.getenv('PROJECT_ID')}/locations/us-central1/publishers/google/models/text-bison@002:predict"
+#     auth = "Bearer $(gcloud auth print-access-token)"
+#     data = {
+#         "instances": [prompt],
+#         "parameters": parameters,
+#     }
+#     response = requests.post(url, auth=auth, json=data)
+#     return response.json()["text"]

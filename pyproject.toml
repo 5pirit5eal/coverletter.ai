@@ -24,8 +24,8 @@ classifiers = [
 ]
 dependencies = [
   # "beautifulsoup4",
-  # "requests",
-  # "google-cloud-aiplatform",
+  "requests",
+  "google-cloud-aiplatform",
   "beartype",
   "flask",
   "SQLAlchemy",
